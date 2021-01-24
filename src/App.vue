@@ -1,6 +1,7 @@
 <template>
   <div id="app">
     <div class="grid">
+      <img src="./assets/Skyline.png" class="video" />
     <video v-for="track in videoTracks" :key="`track-${track.getId()}`" :ref="track.getId()" autoplay class="video"/>
     <audio v-for="track in audioTracks" :key="`track-${track.getId()}`" :ref="track.getId()" autoplay />
     </div>

@@ -348,8 +348,8 @@ export default {
 
         // The STUN servers that will be used in the peer to peer connections
         stunServers: [
-            { urls: 'stun.t-online.de:3478' },
-            { urls: 'meet-jit-si-turnrelay.jitsi.net:443' }
+            { urls: 'stun:stun.t-online.de:3478' },
+            { urls: 'stun:meet-jit-si-turnrelay.jitsi.net:443' }
         ],
 
         // Sets the ICE transport policy for the p2p connection. At the time
