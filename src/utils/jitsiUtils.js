@@ -20,20 +20,24 @@ export function createTracksAndAddToRoom(room) {
     );
 }
 
-export function createAndJoinRoom(connection, roomName) {
+export function createAndJoinRoom(connection, conferenceName) {
     return new Promise((resolve) => {
-        const room = connection.initJitsiConference(roomName, {});
-        room.on(JitsiMeetJS.events.conference.CONFERENCE_JOINED, () => {
+        const conference = connection.initJitsiConference(conferenceName, {});
+        conference.on(JitsiMeetJS.events.conference.CONFERENCE_JOINED, () => {
             console.log("Conference joined", arguments);
-            resolve(room);
+            resolve(conference);
         });
-        room.join('');
+        conference.setDisplayName('jitsi-mod online');
+        conference.join(/*password*/);
     });
 }
 
-export function connect() {
+export function connect(roomName) {
     return new Promise(((resolve, reject) => {
-        const connection = new JitsiMeetJS.JitsiConnection(null, null, options);
+        let optionsWithRoom = { ...options };
+        optionsWithRoom.serviceUrl = options.serviceUrl + `?room=${roomName}`;
+
+        const connection = new JitsiMeetJS.JitsiConnection(null, null, optionsWithRoom);
 
         connection.addEventListener(JitsiMeetJS.events.connection.CONNECTION_ESTABLISHED, () => {
             console.log("Connection established", arguments);

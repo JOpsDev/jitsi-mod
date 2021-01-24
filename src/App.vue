@@ -1,14 +1,13 @@
 <template>
   <div id="app">
-    <h1>Jitsi Mod-era-tor</h1>
-    <video v-for="track in videoTracks" :key="`track-${track.getId()}`" :ref="track.getId()" autoplay />
+    <video v-for="track in videoTracks" :key="`track-${track.getId()}`" :ref="track.getId()" autoplay width="800" />
     <audio v-for="track in audioTracks" :key="`track-${track.getId()}`" :ref="track.getId()" autoplay />
   </div>
 </template>
 
 <script>
 
-import { connect, createAndJoinRoom, createTracksAndAddToRoom } from './utils/jitsiUtils.js'
+import { connect, createAndJoinRoom /*, createTracksAndAddToRoom*/ } from './utils/jitsiUtils.js'
 import JitsiMeetJS from '@lyno/lib-jitsi-meet';
 
 export default {
@@ -22,7 +21,8 @@ export default {
   },
 
   methods: {
-    addTrack(track) {
+    addTrack(track,conference) {
+      conference.selectParticipant(track.getParticipantId());
       if (track.getType() === 'video') {
         this.videoTracks.push(track);
       } else if (track.getType() === 'audio') {
@@ -35,12 +35,13 @@ export default {
   },
 
   mounted() {
-    connect().then(connection => {
-      return createAndJoinRoom(connection, 'vueconf');
+    const roomName = 'vueconf';
+    connect(roomName).then(connection => {
+      return createAndJoinRoom(connection, roomName);
     })
-        .then(room => {
-          room.on(JitsiMeetJS.events.conference.TRACK_ADDED, track => this.addTrack(track));
-          createTracksAndAddToRoom(room);
+        .then(conference => {
+          conference.on(JitsiMeetJS.events.conference.TRACK_ADDED, track => this.addTrack(track,conference));
+          /*createTracksAndAddToRoom(room);*/
         })
         .catch(error => console.error(error));
   }
@@ -53,7 +54,7 @@ export default {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
+  text-align: left;
   color: #2c3e50;
   margin-top: 60px;
 }
