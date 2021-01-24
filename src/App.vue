@@ -1,7 +1,9 @@
 <template>
   <div id="app">
-    <video v-for="track in videoTracks" :key="`track-${track.getId()}`" :ref="track.getId()" autoplay width="800" />
+    <div class="grid">
+    <video v-for="track in videoTracks" :key="`track-${track.getId()}`" :ref="track.getId()" autoplay class="video"/>
     <audio v-for="track in audioTracks" :key="`track-${track.getId()}`" :ref="track.getId()" autoplay />
+    </div>
   </div>
 </template>
 
@@ -16,12 +18,14 @@ export default {
   data() {
     return {
       videoTracks: [],
-      audioTracks: []
+      audioTracks: [],
+      conference: undefined,
+      connection: undefined
     }
   },
 
   methods: {
-    addTrack(track,conference) {
+    addTrack(track, conference) {
       conference.selectParticipant(track.getParticipantId());
       if (track.getType() === 'video') {
         this.videoTracks.push(track);
@@ -37,13 +41,29 @@ export default {
   mounted() {
     const roomName = 'vueconf';
     connect(roomName).then(connection => {
+      this.connection = connection;
       return createAndJoinRoom(connection, roomName);
     })
         .then(conference => {
-          conference.on(JitsiMeetJS.events.conference.TRACK_ADDED, track => this.addTrack(track,conference));
+          this.conference = conference;
+          conference.on(JitsiMeetJS.events.conference.TRACK_ADDED, track => this.addTrack(track, conference));
           /*createTracksAndAddToRoom(room);*/
         })
         .catch(error => console.error(error));
+
+  },
+
+  beforeDestroy() {
+    if (this.conference) {
+      console.log("leaving conference");
+      this.conference.leave();
+      this.conference = undefined;
+    }
+    if (this.connection) {
+      console.log("disconnecting connection now");
+      this.connection.disconnect();
+      this.connection = undefined;
+    }
   }
 }
 
@@ -56,6 +76,21 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: left;
   color: #2c3e50;
-  margin-top: 60px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 50%);
+  grid-column-gap: 10px;
+}
+.video {
+  display: inline-block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  object-fit: contain;
 }
 </style>
