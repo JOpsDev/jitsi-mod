@@ -9,7 +9,7 @@
 
 <script>
 
-import { connect, createAndJoinRoom /*, createTracksAndAddToRoom*/ } from './utils/jitsiUtils.js'
+import { connect, createAndJoinRoom, isModTrack } from './utils/jitsiUtils.js'
 import JitsiMeetJS from '@lyno/lib-jitsi-meet';
 
 export default {
@@ -26,6 +26,12 @@ export default {
 
   methods: {
     addTrack(track, conference) {
+
+      if (!isModTrack(track, conference)) {
+        console.log("Track skipped");
+        return;
+      }
+
       conference.selectParticipant(track.getParticipantId());
       if (track.getType() === 'video') {
         this.videoTracks.push(track);
@@ -39,7 +45,8 @@ export default {
   },
 
   mounted() {
-    const roomName = 'vueconf';
+    let urlParams = new URLSearchParams(window.location.search);
+    const roomName = urlParams.get('room');
     connect(roomName).then(connection => {
       this.connection = connection;
       return createAndJoinRoom(connection, roomName);

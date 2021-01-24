@@ -20,6 +20,11 @@ export function createTracksAndAddToRoom(room) {
     );
 }
 
+export function isModTrack(track, conference) {
+    var participant = conference.participants[track.ownerEndpointId];
+    return participant._displayName.toLowerCase().startsWith("mod");
+}
+
 export function createAndJoinRoom(connection, conferenceName) {
     return new Promise((resolve) => {
         const conference = connection.initJitsiConference(conferenceName, {});
